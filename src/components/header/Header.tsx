@@ -2,10 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { MdMenu, MdOpenInNew } from "react-icons/md";
 
 export const Header = () => {
+    const [title, setTitle] = useState("CodarSe");
     const currentPath = usePathname();
+
+    useEffect(() => {
+        setTitle(document.title);
+    }, [currentPath]);
 
     return (
         <nav className="flex items-center gap-6 justify-start md:justify-center bg-primary py-2 sm:py-4 px-6">
@@ -40,7 +46,9 @@ export const Header = () => {
                 </li>
             </ul>
 
-            <h1 className="sm:hidden">CodarSe - Página inicial</h1>
+            <h1 className="sm:hidden">
+                {title}
+            </h1>
         </nav>
     );
 };
