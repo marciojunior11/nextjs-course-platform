@@ -2,7 +2,7 @@
 
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import { Card, ICardProps } from "../card/Card";
-import { useRef } from "react";
+import { useRef, useState, UIEvent } from "react";
 
 interface ISectionProps {
     title: string;
@@ -13,7 +13,19 @@ interface ISectionProps {
 export const Section = ({ title, variant = "grid", items }: ISectionProps) => {
     const scrollRef = useRef<HTMLUListElement>(null);
 
-    const handleScroll = (scroll: number) => {
+    const [scrollAt, setScrollAt] = useState<"start" | "middle" | "end">("start");
+
+    const handleScroll = (event: UIEvent<HTMLUListElement>) => {
+        if (event.currentTarget.scrollLeft === 0) {
+            setScrollAt("start");
+        } else if ((event.currentTarget.scrollWidth - event.currentTarget.clientWidth) === event.currentTarget.scrollLeft) {
+            setScrollAt("end");
+        } else {
+            setScrollAt("middle");
+        }
+    };
+
+    const handleSetScroll = (scroll: number) => {
         const currentScrollLeft = scrollRef.current?.scrollLeft || 0;
 
         scrollRef.current?.scrollTo({
@@ -27,6 +39,7 @@ export const Section = ({ title, variant = "grid", items }: ISectionProps) => {
             <h2 className="font-bold text-xl ">{title}</h2>
 
             <ul
+                onScroll={handleScroll}
                 ref={scrollRef}
                 data-variant={variant}
                 className={`
@@ -37,12 +50,15 @@ export const Section = ({ title, variant = "grid", items }: ISectionProps) => {
                     data-[variant=h-list]:sm:overflow-x-auto
                 `}
             >
-                <button 
-                    onClick={() => handleScroll(-350)}
-                    className="h-14 w-14 bg-primary rounded-full flex justify-center items-center sticky my-auto left-0 -ml-14"
-                >
-                    <MdKeyboardArrowLeft size={32} />
-                </button>
+                {variant === "h-list" && (
+                    <button
+                        disabled={scrollAt === "start"}
+                        onClick={() => handleSetScroll(-350)}
+                        className="h-14 w-14 bg-primary rounded-full flex justify-center items-center sticky my-auto left-0 -ml-14 disabled:opacity-0 transition-opacity active:opacity-80"
+                    >
+                        <MdKeyboardArrowLeft size={32} />
+                    </button>
+                )}
 
                 {items.map(item => (
                     <li key={item.title} data-variant={variant} className="w-full data-[variant=h-list]:sm:w-72">
@@ -55,12 +71,16 @@ export const Section = ({ title, variant = "grid", items }: ISectionProps) => {
                     </li>
                 ))}
 
-                <button
-                    onClick={() => handleScroll(350)}
-                    className="h-14 w-14 bg-primary rounded-full flex justify-center items-center sticky my-auto right-0 -ml-14"
-                >
-                    <MdKeyboardArrowRight size={32} />
-                </button>
+                {variant === "h-list" && (
+                    <button
+                        disabled={scrollAt === "end"}
+                        onClick={() => handleSetScroll(350)}
+                        className="h-14 w-14 bg-primary rounded-full flex justify-center items-center sticky my-auto right-0 -ml-14 disabled:opacity-0 transition-opacity active:opacity-80"
+                    >
+                        <MdKeyboardArrowRight size={32} />
+                    </button>
+                )}
+
             </ul>
         </section>
     );
